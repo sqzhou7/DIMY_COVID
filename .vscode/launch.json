@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "type": "python",
+            "name": "Launch DIMY server",
+            "program": "src/server/DimyServer.py",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "args": ["127.0.0.1", "55000"]
+        },
+        {
+            "type": "python",
+            "name": "Launch DIMY client",
+            "program": "src/client/Dimy.py",
+            "console": "integratedTerminal",
+            "request": "launch",
+            "args": ["127.0.0.1", "55000"]
+        },
+
+    ]
+}
