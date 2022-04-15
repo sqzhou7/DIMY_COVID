@@ -3,7 +3,7 @@ from socket import *
 from threading import Thread
 import sys, select
 import time
-
+from bitarray import bitarray
 
 
 
@@ -20,7 +20,7 @@ serverSocket = socket(AF_INET, SOCK_STREAM)
 serverSocket.bind(serverAddress)
 
 
-
+CBF_all =[]
 class ClientThread(Thread):
     def __init__(self, clientAddress, clientSocket):
         Thread.__init__(self)
@@ -33,44 +33,36 @@ class ClientThread(Thread):
         
     def run(self):
         message = ''
-        
+        global CBF_all
         while self.clientAlive:
             # use recv() to receive message from the client
-            data = self.clientSocket.recv(1024)
+            data = self.clientSocket.recv(102400)
             message = data.decode()
             
-            # if the message from client is empty, the client would be off-line then set the client as offline (alive=Flase)
-            if message == '':
-                self.clientAlive = False
-                print("===== the user disconnected - ", clientAddress)
-                break
-            
-            # handle message from the client
-            if message == 'login':
-                print("[recv] New login request")
-                self.process_login()
-            elif message == 'download':
-                print("[recv] Download request")
-                message = 'download filename'
-                print("[send] " + message)
-                self.clientSocket.send(message.encode())
-            else:
-                print("[recv] " + message)
-                print("[send] Cannot understand this message")
-                message = 'Cannot understand this message'
-                self.clientSocket.send(message.encode())
-    
-    """
-        You can create more customized APIs here, e.g., logic for processing user authentication
-        Each api can be used to handle one specific function, for example:
-        def process_login(self):
-            message = 'user credentials request'
-            self.clientSocket.send(message.encode())
-    """
-    def process_login(self):
-        message = 'user credentials request'
-        print('[send] ' + message)
-        self.clientSocket.send(message.encode())
+            if message[0] =='C':
+                CBF = bitarray(message[1:])
+                CBF_all.append(CBF.copy())
+                print("Server >>> Accept a CBF")
+            if message[0] == 'Q':
+                QBF = bitarray(message[1:])
+                print("Server >>> Accept a QBF")
+                print("Server >>> Matching QBF and CBF")
+                count_match = 0
+                if len(CBF_all) !=0:
+                    for c in CBF_all:
+                        matchResult = QBF & c
+                        num_sameBits = matchResult.count(1)
+                        if num_sameBits >= 3:
+                            count_match += 1
+                    if count_match >0:
+                        print("Server >>> Result: Matched")
+                        self.clientSocket.send("Matched".encode())
+                    else:
+                        print("Server >>> Result: Not matched")
+                        self.clientSocket.send("Not matched".encode())
+                else:
+                    print("Server >>> Result: no CBF, Not matched")
+                    self.clientSocket.send("Not matched".encode())
 
 
 print("\n===== Server is running =====")
