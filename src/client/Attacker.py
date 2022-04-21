@@ -88,14 +88,17 @@ class EphID_Broadcast(Thread):
                 
                 # wait for the first sender
                 threadlock.acquire()
-                while len(sender_identity_bytes_collection) == 0:
+                if len(sender_identity_bytes_collection) == 0:
+                    threadlock.release()
                     time.sleep(1)
-
+                    continue
+                    
                 for sender_id in sender_identity_bytes_collection:
-                    self.UDP_server.sendto(sender_id + b' ' + public_key_bytes[0:1] + idx.to_bytes(1, 'big') + share + EphID_digest.digest(), ('<broadcast>', BROADCAST_PORT))
+                    print("Attempt to attack node with ID: ",sender_id.decode())
+                    self.UDP_server.sendto(sender_id + b' ' + public_key_bytes[0:1] + (idx+6).to_bytes(1, 'big') + share + EphID_digest.digest(), ('<broadcast>', BROADCAST_PORT))
 
                 threadlock.release()
-                time.sleep(1)
+                time.sleep(3)
 
     
     def get_broadcast_port(self):
