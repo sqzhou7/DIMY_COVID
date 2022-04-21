@@ -190,7 +190,6 @@ class Message_Listener(Thread):
                 # insert just-received record
                 for i in range(len(result)):
                     index = int.from_bytes(result[i][0:1], 'big')
-                    print("dup check:%d"%index)
                     idx_collect.add(index)
                 if int.from_bytes(content_bytes[0:1], 'big') in idx_collect:
                     idx_collect.clear()
@@ -279,11 +278,11 @@ class EphID_Broadcast(Thread):
                 # the share has a 50% chance to get dropped
                 rand_val = random.random()
                 # print(rand_val)
-                # if rand_val >= 0.5: 
-                #     print("BROADCASTERER >>> Index #%d: %s broadcasted" % (idx, hexlify(share)))
-                self.UDP_server.sendto(identity_bytes + b' ' + public_key_bytes[0:1] + idx.to_bytes(1, 'big') + share + EphID_digest.digest(), ('<broadcast>', BROADCAST_PORT))
-                # else:
-                #     print("BROADCASTERER >>> EphID share dropped")
+                if rand_val >= 0.2: 
+                    print("BROADCASTERER >>> Index #%d: %s broadcasted" % (idx, hexlify(share)))
+                    self.UDP_server.sendto(identity_bytes + b' ' + public_key_bytes[0:1] + idx.to_bytes(1, 'big') + share + EphID_digest.digest(), ('<broadcast>', BROADCAST_PORT))
+                else:
+                    print("BROADCASTERER >>> EphID share dropped")
                 time.sleep(3)
 
     
