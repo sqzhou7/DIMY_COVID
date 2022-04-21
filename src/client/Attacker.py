@@ -44,7 +44,9 @@ class Message_Listener(Thread):
                     break
 
             # try to get other nodes' identities and use those identities to broadcast
+            threadlock.acquire()
             sender_identity_bytes = data[:length-1]
+            threadlock.release()
             
             
                 
@@ -84,13 +86,15 @@ class EphID_Broadcast(Thread):
                 
                 
                 # wait for the first sender
+                threadlock.acquire()
                 while sender_identity_bytes == b'0':
                     time.sleep(1)
 
                 self.UDP_server.sendto(sender_identity_bytes + b' ' + public_key_bytes[0:1] + idx.to_bytes(1, 'big') + share + EphID_digest.digest(), ('<broadcast>', BROADCAST_PORT))
                 # else:
                      # print("BROADCASTERER >>> EphID share dropped")
-                time.sleep(1)
+                threadlock.release()
+                time.sleep(0.0000001)
 
     
     def get_broadcast_port(self):
@@ -112,21 +116,21 @@ serverAddress = ("127.0.0.1", SERVER_PORT)
 """
 
 # create a TCP socket for the communication with server
-client_TCP_socket = socket(AF_INET, SOCK_STREAM)
+# client_TCP_socket = socket(AF_INET, SOCK_STREAM)
 
-# build connection with the server
-client_TCP_socket.connect(serverAddress)
+# # build connection with the server
+# client_TCP_socket.connect(serverAddress)
 
-identity_port = client_TCP_socket.getsockname()[1]
-identity_str = str(identity_port)
-identity_bytes = identity_str.encode()
+# identity_port = client_TCP_socket.getsockname()[1]
+# identity_str = str(identity_port)
+# identity_bytes = identity_str.encode()
 
-# holding the identity bytes from all other nodes
+# # holding the identity bytes from all other nodes
 sender_identity_bytes = b'0'
 
 
-print("<identity_str: " + identity_str + ">")
-print("------------connected to the server---------------")
+# print("<identity_str: " + identity_str + ">")
+# print("------------connected to the server---------------")
 
 # create an ECDH instance
 ecdh_instance = ECDH(curve=SECP128r1)
