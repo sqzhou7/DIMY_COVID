@@ -34,7 +34,7 @@ class Message_Listener(Thread):
         #print(self.UDP_client.getsockname())
 
     def run(self):
-        global sender_identity_bytes
+        global sender_identity_bytes_collection
         while (self.alive):
             data, addr = self.UDP_client.recvfrom(1024)
             # message decomposition
@@ -44,8 +44,9 @@ class Message_Listener(Thread):
                     break
 
             # try to get other nodes' identities and use those identities to broadcast
-            threadlock.acquire()
             sender_identity_bytes = data[:length-1]
+            threadlock.acquire()
+            sender_identity_bytes_collection.add(sender_identity_bytes)
             threadlock.release()
             
             
@@ -87,14 +88,14 @@ class EphID_Broadcast(Thread):
                 
                 # wait for the first sender
                 threadlock.acquire()
-                while sender_identity_bytes == b'0':
+                while len(sender_identity_bytes_collection) == 0:
                     time.sleep(1)
 
-                self.UDP_server.sendto(sender_identity_bytes + b' ' + public_key_bytes[0:1] + idx.to_bytes(1, 'big') + share + EphID_digest.digest(), ('<broadcast>', BROADCAST_PORT))
-                # else:
-                     # print("BROADCASTERER >>> EphID share dropped")
+                for sender_id in sender_identity_bytes_collection:
+                    self.UDP_server.sendto(sender_id + b' ' + public_key_bytes[0:1] + idx.to_bytes(1, 'big') + share + EphID_digest.digest(), ('<broadcast>', BROADCAST_PORT))
+
                 threadlock.release()
-                time.sleep(0.0000001)
+                time.sleep(1)
 
     
     def get_broadcast_port(self):
@@ -126,7 +127,7 @@ serverAddress = ("127.0.0.1", SERVER_PORT)
 # identity_bytes = identity_str.encode()
 
 # # holding the identity bytes from all other nodes
-sender_identity_bytes = b'0'
+sender_identity_bytes_collection = set()
 
 
 # print("<identity_str: " + identity_str + ">")
