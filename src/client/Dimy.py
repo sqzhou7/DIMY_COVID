@@ -98,7 +98,8 @@ class Store_DBF(Thread):
                 if len(DBF_all) == 6:
                     DBF_all.pop(0)
                     DBF_all.append(DBF.copy())
-                DBF_all.append(DBF.copy())
+                else:
+                    DBF_all.append(DBF.copy())
                 print("LISTENER >>> the number of stored DBF: %d"%(len(DBF_all)))
                 DBF.clear()
                 print("LISTENER >>> 90s, a new DBF gets created")
