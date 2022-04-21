@@ -264,13 +264,13 @@ class EphID_Broadcast(Thread):
             for idx, share in shares:
                 # broadcast a share every 3 seconds
                 # the share has a 50% chance to get dropped
-                # rand_val = random.random()
-                # print(rand_val)
-                # if rand_val >= 0.5: 
-                # print("BROADCASTERER >>> Index #%d: %s broadcasted" % (idx, hexlify(share)))
-                self.UDP_server.sendto(identity_bytes + b' ' + public_key_bytes[0:1] + idx.to_bytes(1, 'big') + share + EphID_digest.digest(), ('<broadcast>', BROADCAST_PORT))
-                # else:
-                     # print("BROADCASTERER >>> EphID share dropped")
+                rand_val = random.random()
+                print(rand_val)
+                if rand_val >= 0.5: 
+                    print("BROADCASTERER >>> Index #%d: %s broadcasted" % (idx, hexlify(share)))
+                    self.UDP_server.sendto(identity_bytes + b' ' + public_key_bytes[0:1] + idx.to_bytes(1, 'big') + share + EphID_digest.digest(), ('<broadcast>', BROADCAST_PORT))
+                else:
+                    print("BROADCASTERER >>> EphID share dropped")
                 time.sleep(3)
 
     

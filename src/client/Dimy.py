@@ -31,8 +31,9 @@ def DH_process():
     ecdh.generate_private_key()
     local_public_key = ecdh.get_public_key()
     
-
-# create a BloomFilter class
+"""
+    BloomFilter class
+"""
 class BloomFilter():
     def __init__(self, size, num_of_hash):
         super(BloomFilter, self).__init__()
@@ -104,7 +105,9 @@ class Store_DBF(Thread):
                 print("LISTENER >>> a new DBF gets created")
             threadlock.release()
 
-# wait 60s, encode all DBF into a QBF and send QBF to server(the time set is convenient to test, we can set 540s) 
+"""
+    wait 60s, encode all DBF into a QBF and send QBF to server(the time set is convenient to test, we can set 540s)
+"""
 class Send_QBF(Thread):
     def run(self):
         global DBF, DBF_all, COVID
@@ -128,7 +131,10 @@ class Send_QBF(Thread):
                 print("LISTENER >>> Result: ", message)
             else:
                 threadlock.release()
-# create an event after 80s, this client is diagnosed with COVID-19(the time set is convenient to test, we can set 1200s)
+
+"""
+    create an event after 80s, this client is diagnosed with COVID-19(the time set is convenient to test, we can set 1200s)
+"""
 class Event(Thread):
     def run(self):
         global COVID
@@ -264,13 +270,13 @@ class EphID_Broadcast(Thread):
             for idx, share in shares:
                 # broadcast a share every 3 seconds
                 # the share has a 50% chance to get dropped
-                # rand_val = random.random()
+                rand_val = random.random()
                 # print(rand_val)
-                # if rand_val >= 0.5: 
-                # print("BROADCASTERER >>> Index #%d: %s broadcasted" % (idx, hexlify(share)))
-                self.UDP_server.sendto(identity_bytes + b' ' + public_key_bytes[0:1] + idx.to_bytes(1, 'big') + share + EphID_digest.digest(), ('<broadcast>', BROADCAST_PORT))
-                # else:
-                     # print("BROADCASTERER >>> EphID share dropped")
+                if rand_val >= 0.5: 
+                    print("BROADCASTERER >>> Index #%d: %s broadcasted" % (idx, hexlify(share)))
+                    self.UDP_server.sendto(identity_bytes + b' ' + public_key_bytes[0:1] + idx.to_bytes(1, 'big') + share + EphID_digest.digest(), ('<broadcast>', BROADCAST_PORT))
+                else:
+                    print("BROADCASTERER >>> EphID share dropped")
                 time.sleep(3)
 
     
